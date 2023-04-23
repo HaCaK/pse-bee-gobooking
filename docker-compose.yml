@@ -1,0 +1,19 @@
+services:
+  proxy:
+    build:
+      context: ./src
+      dockerfile: proxy/Dockerfile
+    ports:
+      - "8080:8080"
+  property:
+    build:
+      context: ./src
+      dockerfile: property/Dockerfile
+    environment:
+      - DB_CONNECT=mariadb:3306
+      - LOG_LEVEL=info
+  mariadb:
+    image: mariadb:10.5
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=gobooking
