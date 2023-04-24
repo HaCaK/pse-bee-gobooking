@@ -2,7 +2,7 @@ FROM golang:1.20-buster
 
 # copy code
 WORKDIR /go/src/app
-COPY ./property .
+COPY ./proxy .
 COPY ./proto ./proto
 
 RUN apt update && apt install -y protobuf-compiler
@@ -15,10 +15,6 @@ RUN go generate ./...
 RUN go mod tidy -e
 RUN go install
 
-RUN wget https://raw.githubusercontent.com/vishnubob/wait-for-it/81b1373f17855a4dc21156cfe1694c31d7d1792e/wait-for-it.sh
-RUN chmod +x ./wait-for-it.sh ./docker-entrypoint.sh
+CMD ["proxy"]
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["property"]
-
-EXPOSE 9111
+EXPOSE 8080

@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/db"
+	"github.com/HaCaK/pse-bee-gobooking/src/property/proto"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/service"
-	"github.com/HaCaK/pse-bee-gobooking/src/proto/gen"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -36,7 +36,7 @@ func main() {
 		log.Fatalf("failed to listen on grpc port %d: %v", grpcPort, err)
 	}
 	grpcServer := grpc.NewServer()
-	gen.RegisterPropertyExternalServer(grpcServer, &service.PropertyService{})
+	proto.RegisterPropertyExternalServer(grpcServer, &service.PropertyService{})
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}

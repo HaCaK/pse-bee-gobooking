@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/db"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/model"
-	"github.com/HaCaK/pse-bee-gobooking/src/proto/gen"
+	"github.com/HaCaK/pse-bee-gobooking/src/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -15,11 +15,11 @@ import (
 )
 
 type PropertyService struct {
-	gen.UnimplementedPropertyExternalServer
-	gen.UnimplementedPropertyInternalServer
+	proto.UnimplementedPropertyExternalServer
+	proto.UnimplementedPropertyInternalServer
 }
 
-func (s *PropertyService) CreateProperty(_ context.Context, req *gen.CreatePropertyReq) (*gen.Property, error) {
+func (s *PropertyService) CreateProperty(_ context.Context, req *proto.CreatePropertyReq) (*proto.Property, error) {
 	property := model.Property{
 		Name:        req.Name,
 		Description: req.Description,
@@ -39,7 +39,7 @@ func (s *PropertyService) CreateProperty(_ context.Context, req *gen.CreatePrope
 	return mapToProtoProperty(property), nil
 }
 
-func (s *PropertyService) UpdateProperty(_ context.Context, req *gen.UpdatePropertyReq) (*gen.Property, error) {
+func (s *PropertyService) UpdateProperty(_ context.Context, req *proto.UpdatePropertyReq) (*proto.Property, error) {
 	existingProperty, err := getProperty(uint(req.Id))
 	if existingProperty == nil || err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func (s *PropertyService) UpdateProperty(_ context.Context, req *gen.UpdatePrope
 	return mapToProtoProperty(*existingProperty), nil
 }
 
-func (s *PropertyService) ShowProperty(_ context.Context, req *gen.PropertyIdReq) (*gen.Property, error) {
+func (s *PropertyService) ShowProperty(_ context.Context, req *proto.PropertyIdReq) (*proto.Property, error) {
 	existingProperty, err := getProperty(uint(req.Id))
 	if existingProperty == nil || err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (s *PropertyService) ShowProperty(_ context.Context, req *gen.PropertyIdReq
 	return mapToProtoProperty(*existingProperty), nil
 }
 
-func (s *PropertyService) ListProperties(_ context.Context, _ *emptypb.Empty) (*gen.ListPropertiesResp, error) {
+func (s *PropertyService) ListProperties(_ context.Context, _ *emptypb.Empty) (*proto.ListPropertiesResp, error) {
 	var properties []model.Property
 	result := db.DB.Find(&properties)
 	if result.Error != nil {
@@ -75,14 +75,14 @@ func (s *PropertyService) ListProperties(_ context.Context, _ *emptypb.Empty) (*
 	}
 	log.Tracef("Retrieved: %v", properties)
 
-	var protoProperties []*gen.Property
+	var protoProperties []*proto.Property
 	for _, property := range properties {
 		protoProperties = append(protoProperties, mapToProtoProperty(property))
 	}
-	return &gen.ListPropertiesResp{Properties: protoProperties}, nil
+	return &proto.ListPropertiesResp{Properties: protoProperties}, nil
 }
 
-func (s *PropertyService) DeleteProperty(_ context.Context, req *gen.PropertyIdReq) (*emptypb.Empty, error) {
+func (s *PropertyService) DeleteProperty(_ context.Context, req *proto.PropertyIdReq) (*emptypb.Empty, error) {
 	existingProperty, err := getProperty(uint(req.Id))
 	if existingProperty == nil || err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func bookProperty(id uint, bookingId uint) (*model.Property, error) {
 	return existingProperty, nil
 }
 
-func (s *PropertyService) ProcessBooking(_ context.Context, booking *gen.BookingReq) error {
+func (s *PropertyService) ProcessBooking(_ context.Context, booking *proto.BookingReq) error {
 	log.Infof("Received booking: %v", booking)
 
 	existingProperty, err := getProperty(uint(booking.PropertyId))
@@ -151,8 +151,8 @@ func getProperty(id uint) (*model.Property, error) {
 	return existingProperty, nil
 }
 
-func mapToProtoProperty(property model.Property) *gen.Property {
-	return &gen.Property{
+func mapToProtoProperty(property model.Property) *proto.Property {
+	return &proto.Property{
 		Id:          uint32(property.ID),
 		Name:        property.Name,
 		Description: property.Description,

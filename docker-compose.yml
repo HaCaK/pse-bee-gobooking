@@ -5,6 +5,8 @@ services:
       dockerfile: proxy/Dockerfile
     ports:
       - "8080:8080"
+    environment:
+      - PROPERTY_CONNECT=property:9111
   property:
     build:
       context: ./src
