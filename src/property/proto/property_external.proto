@@ -11,29 +11,29 @@ package gen;
 service PropertyExternal {
   rpc CreateProperty(CreatePropertyReq) returns (Property) {
     option (google.api.http) = {
-      post: "/properties/createProperty",
+      post: "/properties",
       body: "*"
     };
   }
   rpc UpdateProperty(UpdatePropertyReq) returns (Property) {
     option (google.api.http) = {
-      put: "/properties/updateProperty/{id}",
+      put: "/properties/{id}",
       body: "*"
     };
   }
   rpc ShowProperty(PropertyIdReq) returns (Property) {
     option (google.api.http) = {
-      get: "/properties/showProperty/{id}"
+      get: "/properties/{id}"
     };
   }
   rpc ListProperties(google.protobuf.Empty) returns (ListPropertiesResp) {
     option (google.api.http) = {
-      get: "/properties/listProperties"
+      get: "/properties"
     };
   }
   rpc DeleteProperty(PropertyIdReq) returns (google.protobuf.Empty) {
     option (google.api.http) = {
-      delete: "/properties/deleteProperty/{id}"
+      delete: "/properties/{id}"
     };
   }
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/db"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/model"
-	"github.com/HaCaK/pse-bee-gobooking/src/proto"
+	"github.com/HaCaK/pse-bee-gobooking/src/property/proto"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -29,7 +29,7 @@ func (s *PropertyService) CreateProperty(_ context.Context, req *proto.CreatePro
 
 	property.SetStatusFree()
 
-	result := db.DB.Create(property)
+	result := db.DB.Create(&property)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -85,7 +85,7 @@ func (s *PropertyService) ListProperties(_ context.Context, _ *emptypb.Empty) (*
 func (s *PropertyService) DeleteProperty(_ context.Context, req *proto.PropertyIdReq) (*emptypb.Empty, error) {
 	existingProperty, err := getProperty(uint(req.Id))
 	if existingProperty == nil || err != nil {
-		return nil, err
+		return new(emptypb.Empty), err
 	}
 	result := db.DB.Delete(existingProperty)
 	if result.Error != nil {
@@ -94,7 +94,7 @@ func (s *PropertyService) DeleteProperty(_ context.Context, req *proto.PropertyI
 	entry := log.WithField("ID", req.Id)
 	entry.Info("Successfully deleted property.")
 	entry.Tracef("Deleted: %v", existingProperty)
-	return nil, nil
+	return new(emptypb.Empty), nil
 }
 
 // should be private because it is an internal func

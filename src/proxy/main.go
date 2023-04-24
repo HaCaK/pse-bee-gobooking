@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/HaCaK/pse-bee-gobooking/src/proto"
+	"github.com/HaCaK/pse-bee-gobooking/src/proxy/proto"
 	"github.com/gin-gonic/gin"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -26,7 +26,11 @@ func main() {
 	// Creating a normal HTTP server
 	server := gin.New()
 	server.Use(gin.Logger())
-	server.Group("properties/*{grpc_gateway}").Any("", gin.WrapH(mux))
+
+	handlerFunc := gin.WrapH(mux)
+
+	server.GET("properties", handlerFunc)
+	server.Group("properties/*{grpc_gateway}").Any("", handlerFunc)
 
 	// start server
 	err = server.Run(fmt.Sprintf(":%d", proxyPort))

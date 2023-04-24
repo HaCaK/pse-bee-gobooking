@@ -9,6 +9,7 @@ require (
 )
 
 require (
+	github.com/HaCaK/pse-bee-gobooking/src/proto v0.0.0-20230423170353-ec39a577a87d // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect

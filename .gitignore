@@ -1,0 +1,11 @@
+/src/property/proto/property_external.pb.gw.go
+/src/property/proto/property_external.pb.go
+/src/property/proto/property_external_grpc.pb.go
+/src/property/proto/property_internal.pb.go
+/src/property/proto/property_internal_grpc.pb.go
+
+/src/proxy/proto/property_external.pb.go
+/src/proxy/proto/property_external.pb.gw.go
+/src/proxy/proto/property_external_grpc.pb.go
+/src/proxy/proto/property_internal.pb.go
+/src/proxy/proto/property_internal_grpc.pb.go

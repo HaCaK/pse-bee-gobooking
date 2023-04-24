@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+option go_package = "github.com/HaCaK/pse-bee-gobooking/src/property/proto";
+
+import "google/protobuf/empty.proto";
+
+package gen;
+
+service PropertyInternal {
+  rpc ProcessBooking (BookingReq) returns (google.protobuf.Empty){}
+}
+
+message BookingReq {
+  int32 id = 1;
+  uint32 booking_id = 2;
+  uint32 property_id = 3;
+}

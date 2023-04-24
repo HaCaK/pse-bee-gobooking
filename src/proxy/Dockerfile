@@ -3,7 +3,6 @@ FROM golang:1.20-buster
 # copy code
 WORKDIR /go/src/app
 COPY ./proxy .
-COPY ./proto ./proto
 
 RUN apt update && apt install -y protobuf-compiler
 RUN GO111MODULE=off go get google.golang.org/protobuf/cmd/protoc-gen-go \
