@@ -20,12 +20,7 @@ var bookingTarget = os.Getenv("BOOKING_CONNECT")
 func main() {
 	mux := runtime.NewServeMux()
 	err := proto.RegisterPropertyExternalHandlerFromEndpoint(context.Background(), mux, propertyTarget, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	mux2 := runtime.NewServeMux()
-	err = proto.RegisterBookingExternalHandlerFromEndpoint(context.Background(), mux2, bookingTarget, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	err = proto.RegisterBookingExternalHandlerFromEndpoint(context.Background(), mux, bookingTarget, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,14 +29,13 @@ func main() {
 	server := gin.New()
 	server.Use(gin.Logger())
 
-	propertyHandlerFunc := gin.WrapH(mux)
-	bookingHandlerFunc := gin.WrapH(mux2)
+	handlerFunc := gin.WrapH(mux)
 
-	server.Group("properties").Any("", propertyHandlerFunc)
-	server.Group("properties/*{grpc_gateway}").Any("", propertyHandlerFunc)
+	server.Group("properties").Any("", handlerFunc)
+	server.Group("properties/*{grpc_gateway}").Any("", handlerFunc)
 
-	server.Group("bookings").Any("", bookingHandlerFunc)
-	server.Group("bookings/*{grpc_gateway}").Any("", bookingHandlerFunc)
+	server.Group("bookings").Any("", handlerFunc)
+	server.Group("bookings/*{grpc_gateway}").Any("", handlerFunc)
 
 	// start server
 	err = server.Run(fmt.Sprintf(":%s", port))
