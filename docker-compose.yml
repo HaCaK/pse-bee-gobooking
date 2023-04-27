@@ -6,13 +6,26 @@ services:
     ports:
       - "8080:8080"
     environment:
+      - PORT=8080
       - PROPERTY_CONNECT=property:9111
+      - BOOKING_CONNECT=booking:9112
+      - LOG_LEVEL=info
   property:
     build:
       context: ./src
       dockerfile: property/Dockerfile
     environment:
+      - PORT=9111
       - DB_CONNECT=mariadb:3306
+      - LOG_LEVEL=info
+  booking:
+    build:
+      context: ./src
+      dockerfile: booking/Dockerfile
+    environment:
+      - PORT=9112
+      - DB_CONNECT=mariadb:3306
+      - PROPERTY_CONNECT=property:9111
       - LOG_LEVEL=info
   mariadb:
     image: mariadb:10.5

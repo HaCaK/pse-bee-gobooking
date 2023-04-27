@@ -1,105 +1,131 @@
 package handler
 
 import (
-	"encoding/json"
+	"context"
+	"errors"
+	"fmt"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/model"
+	"github.com/HaCaK/pse-bee-gobooking/src/property/proto"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/service"
 	log "github.com/sirupsen/logrus"
-	"net/http"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func getPropertyFromRequest(r *http.Request) (*model.Property, error) {
-	var property model.Property
-	err := json.NewDecoder(r.Body).Decode(&property)
-	if err != nil {
-		log.Errorf("Can't decode request body to property struct: %v", err)
+type PropertyHandler struct {
+	proto.UnimplementedPropertyExternalServer
+	proto.UnimplementedPropertyInternalServer
+}
+
+func (h *PropertyHandler) CreateProperty(_ context.Context, req *proto.CreatePropertyReq) (*proto.Property, error) {
+	property := model.Property{
+		Name:        req.Name,
+		Description: req.Description,
+		OwnerName:   req.OwnerName,
+		Address:     req.Address,
+	}
+
+	if err := service.CreateProperty(&property); err != nil {
+		log.Errorf("Failure creating property: %v", err)
 		return nil, err
 	}
-	return &property, nil
+
+	return mapToProtoProperty(property), nil
 }
 
-func CreateProperty(w http.ResponseWriter, r *http.Request) {
-	property, err := getPropertyFromRequest(r)
+func (h *PropertyHandler) UpdateProperty(_ context.Context, req *proto.UpdatePropertyReq) (*proto.Property, error) {
+	property := model.Property{
+		Name:        req.Name,
+		Description: req.Description,
+		OwnerName:   req.OwnerName,
+		Address:     req.Address,
+	}
+
+	updatedProperty, err := service.UpdateProperty(uint(req.Id), &property)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		log.Errorf("Failure updating property with ID %v: %v", req.Id, err)
+		return nil, err
 	}
-	if err := service.CreateProperty(property); err != nil {
-		log.Errorf("Error calling service CreateProperty: %v", err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	if updatedProperty == nil {
+		return nil, errors.New("404 property not found")
 	}
-	sendJson(w, property)
+
+	return mapToProtoProperty(*updatedProperty), nil
 }
 
-func GetProperties(w http.ResponseWriter, r *http.Request) {
+func (h *PropertyHandler) GetProperty(_ context.Context, req *proto.PropertyIdReq) (*proto.Property, error) {
+	property, err := service.GetProperty(uint(req.Id))
+	if err != nil {
+		log.Errorf("Failure retrieving property with ID %v: %v", req.Id, err)
+		return nil, err
+	}
+	if property == nil {
+		return nil, errors.New("404 property not found")
+	}
+	return mapToProtoProperty(*property), nil
+}
+
+func (h *PropertyHandler) GetProperties(_ context.Context, _ *emptypb.Empty) (*proto.ListPropertiesResp, error) {
 	properties, err := service.GetProperties()
 	if err != nil {
-		log.Errorf("Error calling service GetProperties: %v", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		log.Errorf("Failure retrieving properties: %v", err)
+		return nil, err
 	}
-	sendJson(w, properties)
+
+	var protoProperties []*proto.Property
+	for _, property := range properties {
+		protoProperties = append(protoProperties, mapToProtoProperty(property))
+	}
+	return &proto.ListPropertiesResp{Properties: protoProperties}, nil
 }
 
-func GetProperty(w http.ResponseWriter, r *http.Request) {
-	id, err := getId(r)
+func (h *PropertyHandler) DeleteProperty(_ context.Context, req *proto.PropertyIdReq) (*emptypb.Empty, error) {
+	property, err := service.DeleteProperty(uint(req.Id))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	property, err := service.GetProperty(id)
-	if err != nil {
-		log.Errorf("Failure retrieving property with ID %v: %v", id, err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		log.Errorf("Failure deleting property with ID %v: %v", req.Id, err)
+		return nil, err
 	}
 	if property == nil {
-		http.Error(w, "404 property not found", http.StatusNotFound)
-		return
+		return nil, errors.New("404 property not found")
 	}
-	sendJson(w, property)
+	return new(emptypb.Empty), nil
 }
 
-func UpdateProperty(w http.ResponseWriter, r *http.Request) {
-	id, err := getId(r)
+func (h *PropertyHandler) ConfirmBooking(_ context.Context, req *proto.BookingReq) (*emptypb.Empty, error) {
+	log.Infof("Received booking request: %v", req)
+
+	existingProperty, err := service.GetProperty(uint(req.PropertyId))
+	if existingProperty == nil || err != nil {
+		return nil, err
+	}
+
+	if existingProperty.IsStatusBooked() {
+		return nil, fmt.Errorf("sorry, property %s is already booked", existingProperty.Name)
+	}
+
+	err = service.BookProperty(existingProperty, uint(req.BookingId))
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return nil, err
 	}
-	property, err := getPropertyFromRequest(r)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	property, err = service.UpdateProperty(id, property)
-	if err != nil {
-		log.Errorf("Failure updating property with ID %v: %v", id, err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if property == nil {
-		http.Error(w, "404 property not found", http.StatusNotFound)
-		return
-	}
-	sendJson(w, property)
+
+	return new(emptypb.Empty), nil
 }
 
-func DeleteProperty(w http.ResponseWriter, r *http.Request) {
-	id, err := getId(r)
+func (h *PropertyHandler) CancelBooking(_ context.Context, req *proto.BookingReq) (*emptypb.Empty, error) {
+	log.Infof("Received cancellation request: %v", req)
+
+	existingProperty, err := service.GetProperty(uint(req.PropertyId))
+	if existingProperty == nil || err != nil {
+		return nil, err
+	}
+
+	if existingProperty.BookingId != uint(req.BookingId) {
+		return nil, errors.New("property is already booked by other booking")
+	}
+
+	err = service.FreeProperty(existingProperty)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return nil, err
 	}
-	property, err := service.DeleteProperty(id)
-	if err != nil {
-		log.Errorf("Failure deleting property with ID %v: %v", id, err)
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if property == nil {
-		http.Error(w, "404 property not found", http.StatusNotFound)
-		return
-	}
-	sendJson(w, result{Success: "OK"})
+
+	return new(emptypb.Empty), nil
 }

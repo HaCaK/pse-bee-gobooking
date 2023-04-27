@@ -7,7 +7,8 @@ import "google/protobuf/empty.proto";
 package gen;
 
 service PropertyInternal {
-  rpc ProcessBooking (BookingReq) returns (google.protobuf.Empty){}
+  rpc ConfirmBooking (BookingReq) returns (google.protobuf.Empty){}
+  rpc CancelBooking (BookingReq) returns (google.protobuf.Empty){}
 }
 
 message BookingReq {

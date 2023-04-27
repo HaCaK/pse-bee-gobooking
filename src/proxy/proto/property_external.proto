@@ -21,12 +21,12 @@ service PropertyExternal {
       body: "*"
     };
   }
-  rpc ShowProperty(PropertyIdReq) returns (Property) {
+  rpc GetProperty(PropertyIdReq) returns (Property) {
     option (google.api.http) = {
       get: "/properties/{id}"
     };
   }
-  rpc ListProperties(google.protobuf.Empty) returns (ListPropertiesResp) {
+  rpc GetProperties(google.protobuf.Empty) returns (ListPropertiesResp) {
     option (google.api.http) = {
       get: "/properties"
     };
@@ -67,6 +67,7 @@ message Property {
   string description = 3;
   string owner_name = 4;
   string status = 5;
-  google.protobuf.Timestamp created_at = 6;
-  google.protobuf.Timestamp updated_at = 7;
+  uint32 booking_id = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
 }

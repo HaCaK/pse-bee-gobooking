@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/HaCaK/pse-bee-gobooking/src/property/db"
-	"github.com/HaCaK/pse-bee-gobooking/src/property/handler"
-	"github.com/HaCaK/pse-bee-gobooking/src/property/proto"
+	"github.com/HaCaK/pse-bee-gobooking/src/booking/db"
+	"github.com/HaCaK/pse-bee-gobooking/src/booking/handler"
+	"github.com/HaCaK/pse-bee-gobooking/src/booking/proto"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -30,17 +30,14 @@ func init() {
 var port = os.Getenv("PORT")
 
 func main() {
-	log.Info("Starting goBooking property gRPC server")
+	log.Info("Starting goBooking booking gRPC server")
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Fatalf("failed to listen on grpc port %s: %v", port, err)
 	}
 	grpcServer := grpc.NewServer()
-	proto.RegisterPropertyExternalServer(grpcServer, &handler.PropertyHandler{})
-	proto.RegisterPropertyInternalServer(grpcServer, &handler.PropertyHandler{})
-
+	proto.RegisterBookingExternalServer(grpcServer, &handler.BookingHandler{})
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
-
 }

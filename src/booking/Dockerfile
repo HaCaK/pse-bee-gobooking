@@ -1,8 +1,8 @@
 FROM golang:1.20-buster
 
-# copy code
+# copy code and protobuf
 WORKDIR /go/src/app
-COPY ./property .
+COPY ./booking .
 
 # non-go modules dependencies
 RUN apt update && apt install -y protobuf-compiler
@@ -19,6 +19,6 @@ RUN wget https://raw.githubusercontent.com/vishnubob/wait-for-it/81b1373f17855a4
 RUN chmod +x ./wait-for-it.sh ./docker-entrypoint.sh
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
-CMD ["property"]
+CMD ["booking"]
 
-EXPOSE 9111
+EXPOSE 9112

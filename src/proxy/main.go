@@ -12,9 +12,10 @@ import (
 	"os"
 )
 
-const proxyPort = 8080
+var port = os.Getenv("PORT")
 
 var propertyTarget = os.Getenv("PROPERTY_CONNECT")
+var bookingTarget = os.Getenv("BOOKING_CONNECT")
 
 func main() {
 	mux := runtime.NewServeMux()
@@ -23,17 +24,27 @@ func main() {
 		log.Fatal(err)
 	}
 
+	mux2 := runtime.NewServeMux()
+	err = proto.RegisterBookingExternalHandlerFromEndpoint(context.Background(), mux2, bookingTarget, []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// Creating a normal HTTP server
 	server := gin.New()
 	server.Use(gin.Logger())
 
-	handlerFunc := gin.WrapH(mux)
+	propertyHandlerFunc := gin.WrapH(mux)
+	bookingHandlerFunc := gin.WrapH(mux2)
 
-	server.GET("properties", handlerFunc)
-	server.Group("properties/*{grpc_gateway}").Any("", handlerFunc)
+	server.Group("properties").Any("", propertyHandlerFunc)
+	server.Group("properties/*{grpc_gateway}").Any("", propertyHandlerFunc)
+
+	server.Group("bookings").Any("", bookingHandlerFunc)
+	server.Group("bookings/*{grpc_gateway}").Any("", bookingHandlerFunc)
 
 	// start server
-	err = server.Run(fmt.Sprintf(":%d", proxyPort))
+	err = server.Run(fmt.Sprintf(":%s", port))
 	if err != nil {
 		log.Fatal(err)
 	}
