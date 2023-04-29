@@ -39,5 +39,10 @@ func SetupTestDB(t *testing.T) func() {
 		t.Fatalf("Could not connect to test DB: %s", err)
 	}
 
-	return func() { resource.Close() }
+	return func() {
+		err := resource.Close()
+		if err != nil {
+			t.Fatalf("Could not close connection to test DB: %s", err)
+		}
+	}
 }

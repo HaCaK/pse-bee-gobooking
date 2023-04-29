@@ -14,6 +14,8 @@ import (
 	"gorm.io/gorm"
 )
 
+// CreateBooking creates the given booking
+// and tries to confirm the booking at the property service
 func CreateBooking(booking *model.Booking) error {
 	booking.SetStatusPending()
 
@@ -35,6 +37,7 @@ func CreateBooking(booking *model.Booking) error {
 	return nil
 }
 
+// GetBookings retrieves all existing bookings
 func GetBookings() ([]model.Booking, error) {
 	var bookings []model.Booking
 	result := db.DB.Find(&bookings)
@@ -45,6 +48,7 @@ func GetBookings() ([]model.Booking, error) {
 	return bookings, nil
 }
 
+// GetBooking retrieves the booking matching the given id
 func GetBooking(id uint) (*model.Booking, error) {
 	booking := new(model.Booking)
 	result := db.DB.First(booking, id)
@@ -58,6 +62,7 @@ func GetBooking(id uint) (*model.Booking, error) {
 	return booking, nil
 }
 
+// UpdateBooking updates the booking matching the given id
 func UpdateBooking(id uint, booking *model.Booking) (*model.Booking, error) {
 	existingBooking, err := GetBooking(id)
 	if existingBooking == nil || err != nil {
@@ -77,6 +82,8 @@ func UpdateBooking(id uint, booking *model.Booking) (*model.Booking, error) {
 	return existingBooking, nil
 }
 
+// DeleteBooking deletes the booking matching the given id
+// and cancels it at the property service
 func DeleteBooking(id uint) (*model.Booking, error) {
 	booking, err := GetBooking(id)
 	if booking == nil || err != nil {
@@ -98,19 +105,22 @@ func DeleteBooking(id uint) (*model.Booking, error) {
 	return booking, nil
 }
 
+// confirmBooking connects to the property service via gRPC and confirms the given booking
+// NOTE: Deletes the booking if the confirmation fails
 func confirmBooking(booking *model.Booking) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
+
 	conn, err := client.GetPropertyConnection(ctx)
 	if err != nil {
-		log.Errorf("Failed to connect to property service: %v", err)
+		log.Errorf("Error connecting to property service: %v", err)
 		return err
 	}
 
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Errorf("Could not close connection")
+			log.Errorf("Error closing connection: %s", err)
 		}
 	}(conn)
 
@@ -120,7 +130,9 @@ func confirmBooking(booking *model.Booking) error {
 		PropertyId: uint32(booking.PropertyId),
 	})
 	if err != nil {
-		log.Errorf("error calling the property service: %v", err)
+		log.Errorf("Error calling property service: %v", err)
+		entry := log.WithField("bookingId", booking.ID)
+		entry.Info("Trying to delete booking to make state consistent")
 		_, err := DeleteBooking(booking.ID)
 		if err != nil {
 			return err
@@ -138,19 +150,21 @@ func confirmBooking(booking *model.Booking) error {
 	return nil
 }
 
+// cancelBooking connects to the property service via gRPC and cancels the given booking
 func cancelBooking(booking *model.Booking) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
+
 	conn, err := client.GetPropertyConnection(ctx)
 	if err != nil {
-		log.Errorf("Failed to connect to property service: %v", err)
+		log.Errorf("Error connecting to property service: %v", err)
 		return err
 	}
 
 	defer func(conn *grpc.ClientConn) {
 		err := conn.Close()
 		if err != nil {
-			log.Errorf("Could not close connection")
+			log.Errorf("Error closing connection: %s", err)
 		}
 	}(conn)
 
@@ -160,7 +174,7 @@ func cancelBooking(booking *model.Booking) error {
 		PropertyId: uint32(booking.PropertyId),
 	})
 	if err != nil {
-		log.Errorf("error calling the property service: %v", err)
+		log.Errorf("Error calling property service: %v", err)
 		return err
 	}
 

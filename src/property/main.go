@@ -29,18 +29,19 @@ func init() {
 
 var port = os.Getenv("PORT")
 
+// main creates a gRPC server for all requests related to properties
 func main() {
 	log.Info("Starting goBooking property gRPC server")
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
 	if err != nil {
-		log.Fatalf("failed to listen on grpc port %s: %v", port, err)
+		log.Fatalf("Failed to listen on grpc port %s: %v", port, err)
 	}
 	grpcServer := grpc.NewServer()
 	proto.RegisterPropertyExternalServer(grpcServer, &handler.PropertyHandler{})
 	proto.RegisterPropertyInternalServer(grpcServer, &handler.PropertyHandler{})
 
 	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("Failed to serve: %v", err)
 	}
 
 }

@@ -3,17 +3,18 @@ package handler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/model"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/proto"
 	"github.com/HaCaK/pse-bee-gobooking/src/property/service"
 	log "github.com/sirupsen/logrus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type PropertyHandler struct {
-	proto.UnimplementedPropertyExternalServer
-	proto.UnimplementedPropertyInternalServer
+	proto.PropertyExternalServer
+	proto.PropertyInternalServer
 }
 
 func (h *PropertyHandler) CreateProperty(_ context.Context, req *proto.CreatePropertyReq) (*proto.Property, error) {
@@ -25,8 +26,8 @@ func (h *PropertyHandler) CreateProperty(_ context.Context, req *proto.CreatePro
 	}
 
 	if err := service.CreateProperty(&property); err != nil {
-		log.Errorf("Failure creating property: %v", err)
-		return nil, err
+		log.Errorf("Error calling service CreateProperty: %v", err)
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
 	return mapToProtoProperty(property), nil
@@ -42,11 +43,11 @@ func (h *PropertyHandler) UpdateProperty(_ context.Context, req *proto.UpdatePro
 
 	updatedProperty, err := service.UpdateProperty(uint(req.Id), &property)
 	if err != nil {
-		log.Errorf("Failure updating property with ID %v: %v", req.Id, err)
-		return nil, err
+		log.Errorf("Error calling service UpdateProperty with ID %v: %v", req.Id, err)
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 	if updatedProperty == nil {
-		return nil, errors.New("404 property not found")
+		return nil, status.Errorf(codes.NotFound, "Property not found")
 	}
 
 	return mapToProtoProperty(*updatedProperty), nil
@@ -55,11 +56,11 @@ func (h *PropertyHandler) UpdateProperty(_ context.Context, req *proto.UpdatePro
 func (h *PropertyHandler) GetProperty(_ context.Context, req *proto.PropertyIdReq) (*proto.Property, error) {
 	property, err := service.GetProperty(uint(req.Id))
 	if err != nil {
-		log.Errorf("Failure retrieving property with ID %v: %v", req.Id, err)
-		return nil, err
+		log.Errorf("Error calling service GetProperty with ID %v: %v", req.Id, err)
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 	if property == nil {
-		return nil, errors.New("404 property not found")
+		return nil, status.Errorf(codes.NotFound, "Property not found")
 	}
 	return mapToProtoProperty(*property), nil
 }
@@ -67,8 +68,8 @@ func (h *PropertyHandler) GetProperty(_ context.Context, req *proto.PropertyIdRe
 func (h *PropertyHandler) GetProperties(_ context.Context, _ *emptypb.Empty) (*proto.ListPropertiesResp, error) {
 	properties, err := service.GetProperties()
 	if err != nil {
-		log.Errorf("Failure retrieving properties: %v", err)
-		return nil, err
+		log.Errorf("Error calling service GetProperties: %v", err)
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
 	var protoProperties []*proto.Property
@@ -80,12 +81,17 @@ func (h *PropertyHandler) GetProperties(_ context.Context, _ *emptypb.Empty) (*p
 
 func (h *PropertyHandler) DeleteProperty(_ context.Context, req *proto.PropertyIdReq) (*emptypb.Empty, error) {
 	property, err := service.DeleteProperty(uint(req.Id))
+
 	if err != nil {
-		log.Errorf("Failure deleting property with ID %v: %v", req.Id, err)
-		return nil, err
+		log.Errorf("Error calling service DeleteProperty with ID %v: %v", req.Id, err)
+
+		if errors.Is(err, new(model.PropertyError)) {
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 	if property == nil {
-		return nil, errors.New("404 property not found")
+		return nil, status.Errorf(codes.NotFound, "Property not found")
 	}
 	return new(emptypb.Empty), nil
 }
@@ -98,13 +104,14 @@ func (h *PropertyHandler) ConfirmBooking(_ context.Context, req *proto.BookingRe
 		return nil, err
 	}
 
-	if existingProperty.IsStatusBooked() {
-		return nil, fmt.Errorf("sorry, property %s is already booked", existingProperty.Name)
-	}
-
 	err = service.BookProperty(existingProperty, uint(req.BookingId))
 	if err != nil {
-		return nil, err
+		log.Errorf("Error calling service BookProperty with ID %v: %v", req.PropertyId, err)
+
+		if errors.Is(err, new(model.PropertyError)) {
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
 	return new(emptypb.Empty), nil
@@ -119,12 +126,17 @@ func (h *PropertyHandler) CancelBooking(_ context.Context, req *proto.BookingReq
 	}
 
 	if existingProperty.BookingId != uint(req.BookingId) {
-		return nil, errors.New("property is already booked by other booking")
+		return nil, status.Errorf(codes.InvalidArgument, "Whoops! It seems as if the property %s (ID: %d) was booked with a different booking.", existingProperty.Name, existingProperty.ID)
 	}
 
-	err = service.FreeProperty(existingProperty)
+	err = service.FreeProperty(existingProperty, uint(req.BookingId))
 	if err != nil {
-		return nil, err
+		log.Errorf("Error calling service FreeProperty with ID %v: %v", req.PropertyId, err)
+
+		if errors.Is(err, new(model.PropertyError)) {
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
+		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
 	return new(emptypb.Empty), nil
