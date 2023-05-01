@@ -22,11 +22,12 @@ func (h *BookingHandler) CreateBooking(_ context.Context, req *proto.CreateBooki
 		PropertyId:   uint(req.PropertyId),
 	}
 
-	if err := service.CreateBooking(&booking); err != nil {
+	createdBooking, err := service.CreateBooking(&booking)
+	if err != nil {
 		log.Errorf("Error calling service CreateBooking: %v", err)
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
-	return mapToProtoBooking(booking), nil
+	return mapToProtoBooking(createdBooking), nil
 }
 
 func (h *BookingHandler) UpdateBooking(_ context.Context, req *proto.UpdateBookingReq) (*proto.Booking, error) {
@@ -44,7 +45,7 @@ func (h *BookingHandler) UpdateBooking(_ context.Context, req *proto.UpdateBooki
 	if updatedBooking == nil {
 		return nil, status.Errorf(codes.NotFound, "Booking not found")
 	}
-	return mapToProtoBooking(*updatedBooking), nil
+	return mapToProtoBooking(updatedBooking), nil
 }
 
 func (h *BookingHandler) GetBooking(_ context.Context, req *proto.BookingIdReq) (*proto.Booking, error) {
@@ -56,7 +57,7 @@ func (h *BookingHandler) GetBooking(_ context.Context, req *proto.BookingIdReq) 
 	if booking == nil {
 		return nil, status.Errorf(codes.NotFound, "Booking not found")
 	}
-	return mapToProtoBooking(*booking), nil
+	return mapToProtoBooking(booking), nil
 }
 
 func (h *BookingHandler) GetBookings(_ context.Context, _ *emptypb.Empty) (*proto.ListBookingsResp, error) {
@@ -68,7 +69,7 @@ func (h *BookingHandler) GetBookings(_ context.Context, _ *emptypb.Empty) (*prot
 
 	var protoBookings []*proto.Booking
 	for _, booking := range bookings {
-		protoBookings = append(protoBookings, mapToProtoBooking(booking))
+		protoBookings = append(protoBookings, mapToProtoBooking(&booking))
 	}
 	return &proto.ListBookingsResp{Bookings: protoBookings}, nil
 }

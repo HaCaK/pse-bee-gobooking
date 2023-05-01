@@ -16,12 +16,12 @@ import (
 
 // CreateBooking creates the given booking
 // and tries to confirm the booking at the property service
-func CreateBooking(booking *model.Booking) error {
+func CreateBooking(booking *model.Booking) (*model.Booking, error) {
 	booking.SetStatusPending()
 
 	result := db.DB.Create(booking)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
 
 	entry := log.WithField("ID", booking.ID)
@@ -30,11 +30,11 @@ func CreateBooking(booking *model.Booking) error {
 
 	err := confirmBooking(booking)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	entry.Info("Successfully confirmed booking.")
-	return nil
+	return booking, nil
 }
 
 // GetBookings retrieves all existing bookings

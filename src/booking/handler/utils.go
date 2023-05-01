@@ -6,7 +6,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func mapToProtoBooking(booking model.Booking) *proto.Booking {
+func mapToProtoBooking(booking *model.Booking) *proto.Booking {
 	return &proto.Booking{
 		Id:           uint32(booking.ID),
 		Comment:      booking.Comment,
