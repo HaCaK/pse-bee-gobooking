@@ -6,8 +6,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func mapToProtoProperty(property model.Property) *proto.Property {
-	return &proto.Property{
+func mapToProtoPropertyResp(property *model.Property) *proto.PropertyResp {
+	return &proto.PropertyResp{
 		Id:          uint32(property.ID),
 		Name:        property.Name,
 		Description: property.Description,

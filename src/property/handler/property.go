@@ -17,7 +17,7 @@ type PropertyHandler struct {
 	proto.PropertyInternalServer
 }
 
-func (h *PropertyHandler) CreateProperty(_ context.Context, req *proto.CreatePropertyReq) (*proto.Property, error) {
+func (h *PropertyHandler) CreateProperty(_ context.Context, req *proto.CreatePropertyReq) (*proto.PropertyResp, error) {
 	property := model.Property{
 		Name:        req.Name,
 		Description: req.Description,
@@ -30,10 +30,10 @@ func (h *PropertyHandler) CreateProperty(_ context.Context, req *proto.CreatePro
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	return mapToProtoProperty(property), nil
+	return mapToProtoPropertyResp(&property), nil
 }
 
-func (h *PropertyHandler) UpdateProperty(_ context.Context, req *proto.UpdatePropertyReq) (*proto.Property, error) {
+func (h *PropertyHandler) UpdateProperty(_ context.Context, req *proto.UpdatePropertyReq) (*proto.PropertyResp, error) {
 	property := model.Property{
 		Name:        req.Name,
 		Description: req.Description,
@@ -50,10 +50,10 @@ func (h *PropertyHandler) UpdateProperty(_ context.Context, req *proto.UpdatePro
 		return nil, status.Errorf(codes.NotFound, "Property not found")
 	}
 
-	return mapToProtoProperty(*updatedProperty), nil
+	return mapToProtoPropertyResp(updatedProperty), nil
 }
 
-func (h *PropertyHandler) GetProperty(_ context.Context, req *proto.PropertyIdReq) (*proto.Property, error) {
+func (h *PropertyHandler) GetProperty(_ context.Context, req *proto.PropertyIdReq) (*proto.PropertyResp, error) {
 	property, err := service.GetProperty(uint(req.Id))
 	if err != nil {
 		log.Errorf("Error calling service GetProperty with ID %v: %v", req.Id, err)
@@ -62,7 +62,7 @@ func (h *PropertyHandler) GetProperty(_ context.Context, req *proto.PropertyIdRe
 	if property == nil {
 		return nil, status.Errorf(codes.NotFound, "Property not found")
 	}
-	return mapToProtoProperty(*property), nil
+	return mapToProtoPropertyResp(property), nil
 }
 
 func (h *PropertyHandler) GetProperties(_ context.Context, _ *emptypb.Empty) (*proto.ListPropertiesResp, error) {
@@ -72,9 +72,9 @@ func (h *PropertyHandler) GetProperties(_ context.Context, _ *emptypb.Empty) (*p
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 
-	var protoProperties []*proto.Property
+	var protoProperties []*proto.PropertyResp
 	for _, property := range properties {
-		protoProperties = append(protoProperties, mapToProtoProperty(property))
+		protoProperties = append(protoProperties, mapToProtoPropertyResp(&property))
 	}
 	return &proto.ListPropertiesResp{Properties: protoProperties}, nil
 }

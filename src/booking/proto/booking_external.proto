@@ -9,19 +9,19 @@ import "google/protobuf/empty.proto";
 package gen;
 
 service BookingExternal {
-  rpc CreateBooking(CreateBookingReq) returns (Booking) {
+  rpc CreateBooking(CreateBookingReq) returns (BookingResp) {
     option (google.api.http) = {
       post: "/bookings",
       body: "*"
     };
   }
-  rpc UpdateBooking(UpdateBookingReq) returns (Booking) {
+  rpc UpdateBooking(UpdateBookingReq) returns (BookingResp) {
     option (google.api.http) = {
       put: "/bookings/{id}",
       body: "*"
     };
   }
-  rpc GetBooking(BookingIdReq) returns (Booking) {
+  rpc GetBooking(BookingIdReq) returns (BookingResp) {
     option (google.api.http) = {
       get: "/bookings/{id}"
     };
@@ -56,10 +56,10 @@ message BookingIdReq {
 }
 
 message ListBookingsResp {
-  repeated Booking bookings = 1;
+  repeated BookingResp bookings = 1;
 }
 
-message Booking {
+message BookingResp {
   uint32 id = 1;
   string comment = 2;
   string customer_name = 3;

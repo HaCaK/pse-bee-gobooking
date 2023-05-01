@@ -9,19 +9,19 @@ import "google/protobuf/empty.proto";
 package gen;
 
 service PropertyExternal {
-  rpc CreateProperty(CreatePropertyReq) returns (Property) {
+  rpc CreateProperty(CreatePropertyReq) returns (PropertyResp) {
     option (google.api.http) = {
       post: "/properties",
       body: "*"
     };
   }
-  rpc UpdateProperty(UpdatePropertyReq) returns (Property) {
+  rpc UpdateProperty(UpdatePropertyReq) returns (PropertyResp) {
     option (google.api.http) = {
       put: "/properties/{id}",
       body: "*"
     };
   }
-  rpc GetProperty(PropertyIdReq) returns (Property) {
+  rpc GetProperty(PropertyIdReq) returns (PropertyResp) {
     option (google.api.http) = {
       get: "/properties/{id}"
     };
@@ -58,10 +58,10 @@ message PropertyIdReq {
 }
 
 message ListPropertiesResp {
-  repeated Property properties = 1;
+  repeated PropertyResp properties = 1;
 }
 
-message Property {
+message PropertyResp {
   uint32 id = 1;
   string name = 2;
   string description = 3;
