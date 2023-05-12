@@ -1,21 +1,19 @@
 FROM golang:1.20-buster
 
+# non-go modules dependencies
+RUN apt update && apt install -y protobuf-compiler
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.3
+
 # copy code and protobuf
 WORKDIR /go/src/app
 COPY ./booking .
-
-# non-go modules dependencies
-RUN apt update && apt install -y protobuf-compiler
-RUN GO111MODULE=off go get google.golang.org/protobuf/cmd/protoc-gen-go \
-    google.golang.org/grpc/cmd/protoc-gen-go-grpc \
-    github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+COPY ./wait-for-it.sh .
 
 RUN go mod download
 RUN go generate ./...
-RUN go mod tidy -e
 RUN go install
 
-RUN wget https://raw.githubusercontent.com/vishnubob/wait-for-it/81b1373f17855a4dc21156cfe1694c31d7d1792e/wait-for-it.sh
 RUN chmod +x ./wait-for-it.sh ./docker-entrypoint.sh
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
