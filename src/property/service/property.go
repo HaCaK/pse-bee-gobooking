@@ -120,7 +120,7 @@ func BookProperty(existingProperty *model.Property, bookingId uint) error {
 // This is checked to prevent someone from cancelling another person's booking
 func FreeProperty(existingProperty *model.Property, requestedBookingId uint) error {
 	if existingProperty.BookingId != requestedBookingId {
-		message := fmt.Sprintf("Whoops! It seems as if the property %s (ID: %d) was booked with a different booking.", existingProperty.Name, existingProperty.ID)
+		message := fmt.Sprintf("Whoops! It seems as if the property %s (ID: %d) is already booked.", existingProperty.Name, existingProperty.ID)
 		return &model.PropertyError{Message: message}
 	}
 

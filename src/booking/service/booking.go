@@ -85,6 +85,18 @@ func UpdateBooking(id uint, booking *model.Booking) (*model.Booking, error) {
 // DeleteBooking deletes the booking matching the given id
 // and cancels it at the property service
 func DeleteBooking(id uint) (*model.Booking, error) {
+	booking, err := deleteWithoutCancellation(id)
+
+	err = cancelBooking(booking)
+	if err != nil {
+		return nil, err
+	}
+
+	return booking, nil
+}
+
+// deleteWithoutCancellation deletes the booking matching the given id
+func deleteWithoutCancellation(id uint) (*model.Booking, error) {
 	booking, err := GetBooking(id)
 	if booking == nil || err != nil {
 		return booking, err
@@ -96,11 +108,6 @@ func DeleteBooking(id uint) (*model.Booking, error) {
 	entry := log.WithField("ID", id)
 	entry.Info("Successfully deleted booking.")
 	entry.Tracef("Deleted: %v", booking)
-
-	err = cancelBooking(booking)
-	if err != nil {
-		return nil, err
-	}
 
 	return booking, nil
 }
@@ -133,9 +140,11 @@ func confirmBooking(booking *model.Booking) error {
 		log.Errorf("Error calling property service: %v", err)
 		entry := log.WithField("bookingId", booking.ID)
 		entry.Info("Trying to delete booking to make state consistent")
-		_, err := DeleteBooking(booking.ID)
-		if err != nil {
-			return err
+		// does not require cancellation because booking was never confirmed
+		_, deleteErr := deleteWithoutCancellation(booking.ID)
+
+		if deleteErr != nil {
+			return errors.Join(err, deleteErr)
 		}
 		return err
 	}

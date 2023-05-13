@@ -100,7 +100,10 @@ func (h *PropertyHandler) ConfirmBooking(_ context.Context, req *proto.BookingRe
 	log.Infof("Received booking request: %v", req)
 
 	existingProperty, err := service.GetProperty(uint(req.PropertyId))
-	if existingProperty == nil || err != nil {
+	if existingProperty == nil {
+		return nil, status.Errorf(codes.NotFound, "Property not found")
+	}
+	if err != nil {
 		return nil, err
 	}
 
@@ -121,12 +124,11 @@ func (h *PropertyHandler) CancelBooking(_ context.Context, req *proto.BookingReq
 	log.Infof("Received cancellation request: %v", req)
 
 	existingProperty, err := service.GetProperty(uint(req.PropertyId))
-	if existingProperty == nil || err != nil {
-		return nil, err
+	if existingProperty == nil {
+		return nil, status.Errorf(codes.NotFound, "Property not found")
 	}
-
-	if existingProperty.BookingId != uint(req.BookingId) {
-		return nil, status.Errorf(codes.InvalidArgument, "Whoops! It seems as if the property %s (ID: %d) was booked with a different booking.", existingProperty.Name, existingProperty.ID)
+	if err != nil {
+		return nil, err
 	}
 
 	err = service.FreeProperty(existingProperty, uint(req.BookingId))
