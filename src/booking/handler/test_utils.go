@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"errors"
 	"github.com/HaCaK/pse-bee-gobooking/src/booking/db"
 	"github.com/HaCaK/pse-bee-gobooking/src/booking/model"
 	"github.com/HaCaK/pse-bee-gobooking/src/booking/proto"
@@ -10,7 +9,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
-	"gorm.io/gorm"
 	"net"
 )
 
@@ -72,24 +70,15 @@ func getMockBookingResp(customerName string) *proto.BookingResp {
 }
 
 func createBookingInDB() {
-	result := db.DB.First(new(model.Booking), 1)
-
-	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-		booking := model.Booking{
-			Comment:      "comment",
-			CustomerName: "customer",
-			Status:       "PENDING",
-			PropertyId:   1,
-		}
-		db.DB.Create(&booking)
+	booking := model.Booking{
+		Comment:      "comment",
+		CustomerName: "customer",
+		Status:       "PENDING",
+		PropertyId:   1,
 	}
+	db.DB.Create(&booking)
 }
 
 func deleteBookingInDB() {
-	// delete mock booking if it exists
-	booking := new(model.Booking)
-	result := db.DB.First(booking, 1)
-	if result.Error == nil {
-		db.DB.Delete(booking)
-	}
+	db.DB.Delete(new(model.Booking), 1)
 }

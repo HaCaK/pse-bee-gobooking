@@ -13,26 +13,38 @@ import (
 
 type PropertyTestSuite struct {
 	suite.Suite
-	cleanUpDB func()
+	ctx         context.Context
+	client      proto.PropertyExternalClient
+	closeServer func()
+	cleanUpDB   func()
 }
 
 // beforeAll
 func (suite *PropertyTestSuite) SetupSuite() {
 	log.Info(">>> From SetupSuite")
+	suite.ctx = context.Background()
+	suite.client, suite.closeServer = server(suite.ctx)
+}
+
+// beforeEach
+func (suite *PropertyTestSuite) SetupTest() {
+	log.Info("--- From SetupTest: Setting up fresh DB")
 	suite.cleanUpDB = db.SetupTestDB(suite.T())
 }
 
 // afterAll
 func (suite *PropertyTestSuite) TearDownSuite() {
 	log.Info(">>> From TearDownSuite")
+	suite.closeServer()
+}
+
+// afterEach
+func (suite *PropertyTestSuite) TearDownTest() {
+	log.Info("--- From TearDownTest: Cleaning up DB")
 	suite.cleanUpDB()
 }
 
 func (suite *PropertyTestSuite) TestPropertyHandler_GetProperties() {
-	ctx := context.Background()
-	client, closer := server(ctx)
-	defer closer()
-
 	type expectation struct {
 		out *proto.ListPropertiesResp
 		err error
@@ -75,7 +87,7 @@ func (suite *PropertyTestSuite) TestPropertyHandler_GetProperties() {
 			testData.setupFunc()
 		}
 
-		out, err := client.GetProperties(ctx, testData.in)
+		out, err := suite.client.GetProperties(suite.ctx, testData.in)
 		if err != nil {
 			if testData.expected.err.Error() != err.Error() {
 				suite.T().Errorf("Err:\n Expected: %v\n Actual: %v", testData.expected.err, err)
@@ -93,10 +105,6 @@ func (suite *PropertyTestSuite) TestPropertyHandler_GetProperties() {
 }
 
 func (suite *PropertyTestSuite) TestPropertyHandler_GetProperty() {
-	ctx := context.Background()
-	client, closer := server(ctx)
-	defer closer()
-
 	type expectation struct {
 		out *proto.PropertyResp
 		err error
@@ -148,7 +156,7 @@ func (suite *PropertyTestSuite) TestPropertyHandler_GetProperty() {
 			testData.setupFunc()
 		}
 
-		out, err := client.GetProperty(ctx, testData.in)
+		out, err := suite.client.GetProperty(suite.ctx, testData.in)
 		if err != nil {
 			if testData.expected.err.Error() != err.Error() {
 				suite.T().Errorf("Err:\n Expected: %v\n Actual: %v", testData.expected.err, err)
@@ -165,10 +173,6 @@ func (suite *PropertyTestSuite) TestPropertyHandler_GetProperty() {
 }
 
 func (suite *PropertyTestSuite) TestPropertyHandler_UpdateProperty() {
-	ctx := context.Background()
-	client, closer := server(ctx)
-	defer closer()
-
 	type expectation struct {
 		out *proto.PropertyResp
 		err error
@@ -220,7 +224,7 @@ func (suite *PropertyTestSuite) TestPropertyHandler_UpdateProperty() {
 			testData.setupFunc()
 		}
 
-		out, err := client.UpdateProperty(ctx, testData.in)
+		out, err := suite.client.UpdateProperty(suite.ctx, testData.in)
 
 		if err != nil {
 			if testData.expected.err.Error() != err.Error() {
@@ -238,10 +242,6 @@ func (suite *PropertyTestSuite) TestPropertyHandler_UpdateProperty() {
 }
 
 func (suite *PropertyTestSuite) TestPropertyHandler_CreateProperty() {
-	ctx := context.Background()
-	client, closer := server(ctx)
-	defer closer()
-
 	type expectation struct {
 		out *proto.PropertyResp
 		err error
@@ -273,7 +273,7 @@ func (suite *PropertyTestSuite) TestPropertyHandler_CreateProperty() {
 			testData.setupFunc()
 		}
 
-		out, err := client.CreateProperty(ctx, testData.in)
+		out, err := suite.client.CreateProperty(suite.ctx, testData.in)
 
 		if err != nil {
 			if testData.expected.err.Error() != err.Error() {
@@ -291,10 +291,6 @@ func (suite *PropertyTestSuite) TestPropertyHandler_CreateProperty() {
 }
 
 func (suite *PropertyTestSuite) TestPropertyHandler_DeleteProperty() {
-	ctx := context.Background()
-	client, closer := server(ctx)
-	defer closer()
-
 	type expectation struct {
 		out *emptypb.Empty
 		err error
@@ -346,7 +342,7 @@ func (suite *PropertyTestSuite) TestPropertyHandler_DeleteProperty() {
 			testData.setupFunc()
 		}
 
-		out, err := client.DeleteProperty(ctx, testData.in)
+		out, err := suite.client.DeleteProperty(suite.ctx, testData.in)
 		if err != nil {
 			if testData.expected.err.Error() != err.Error() {
 				suite.T().Errorf("Err:\n Expected: %v\n Actual: %v", testData.expected.err, err)

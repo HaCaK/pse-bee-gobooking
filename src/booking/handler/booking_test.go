@@ -13,26 +13,38 @@ import (
 
 type BookingTestSuite struct {
 	suite.Suite
-	cleanUpDB func()
+	ctx         context.Context
+	client      proto.BookingExternalClient
+	closeServer func()
+	cleanUpDB   func()
 }
 
 // beforeAll
 func (suite *BookingTestSuite) SetupSuite() {
 	log.Info(">>> From SetupSuite")
+	suite.ctx = context.Background()
+	suite.client, suite.closeServer = server(suite.ctx)
+}
+
+// beforeEach
+func (suite *BookingTestSuite) SetupTest() {
+	log.Info("--- From SetupTest: Setting up fresh DB")
 	suite.cleanUpDB = db.SetupTestDB(suite.T())
 }
 
 // afterAll
 func (suite *BookingTestSuite) TearDownSuite() {
 	log.Info(">>> From TearDownSuite")
+	suite.closeServer()
+}
+
+// afterEach
+func (suite *BookingTestSuite) TearDownTest() {
+	log.Info("--- From TearDownTest: Cleaning up DB")
 	suite.cleanUpDB()
 }
 
 func (suite *BookingTestSuite) TestBookingHandler_GetBookings() {
-	ctx := context.Background()
-	client, closer := server(ctx)
-	defer closer()
-
 	type expectation struct {
 		out *proto.ListBookingsResp
 		err error
@@ -75,7 +87,7 @@ func (suite *BookingTestSuite) TestBookingHandler_GetBookings() {
 			testData.setupFunc()
 		}
 
-		out, err := client.GetBookings(ctx, testData.in)
+		out, err := suite.client.GetBookings(suite.ctx, testData.in)
 		if err != nil {
 			if testData.expected.err.Error() != err.Error() {
 				suite.T().Errorf("Err:\n Expected: %v\n Actual: %v", testData.expected.err, err)
@@ -93,10 +105,6 @@ func (suite *BookingTestSuite) TestBookingHandler_GetBookings() {
 }
 
 func (suite *BookingTestSuite) TestBookingHandler_GetBooking() {
-	ctx := context.Background()
-	client, closer := server(ctx)
-	defer closer()
-
 	type expectation struct {
 		out *proto.BookingResp
 		err error
@@ -148,7 +156,7 @@ func (suite *BookingTestSuite) TestBookingHandler_GetBooking() {
 			testData.setupFunc()
 		}
 
-		out, err := client.GetBooking(ctx, testData.in)
+		out, err := suite.client.GetBooking(suite.ctx, testData.in)
 		if err != nil {
 			if testData.expected.err.Error() != err.Error() {
 				suite.T().Errorf("Err:\n Expected: %v\n Actual: %v", testData.expected.err, err)
@@ -165,10 +173,6 @@ func (suite *BookingTestSuite) TestBookingHandler_GetBooking() {
 }
 
 func (suite *BookingTestSuite) TestBookingHandler_UpdateBooking() {
-	ctx := context.Background()
-	client, closer := server(ctx)
-	defer closer()
-
 	type expectation struct {
 		out *proto.BookingResp
 		err error
@@ -201,7 +205,6 @@ func (suite *BookingTestSuite) TestBookingHandler_UpdateBooking() {
 		"GivenOneBooking_WhenUpdateBooking_ThenReturnUpdatedBooking": {
 			in: &proto.UpdateBookingReq{Id: 1, CustomerName: "other"},
 			setupFunc: func() {
-				deleteBookingInDB()
 				createBookingInDB()
 			},
 			tearDownFunc: func() {
@@ -221,7 +224,7 @@ func (suite *BookingTestSuite) TestBookingHandler_UpdateBooking() {
 			testData.setupFunc()
 		}
 
-		out, err := client.UpdateBooking(ctx, testData.in)
+		out, err := suite.client.UpdateBooking(suite.ctx, testData.in)
 
 		if err != nil {
 			if testData.expected.err.Error() != err.Error() {

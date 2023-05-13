@@ -78,6 +78,5 @@ func createPropertyInDB() {
 }
 
 func deletePropertyInDB() {
-	// delete mock property if it exists
 	db.DB.Delete(new(model.Property), 1)
 }
