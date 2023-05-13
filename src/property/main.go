@@ -37,8 +37,9 @@ func main() {
 		log.Fatalf("Failed to listen on grpc port %s: %v", port, err)
 	}
 	grpcServer := grpc.NewServer()
-	proto.RegisterPropertyExternalServer(grpcServer, &handler.PropertyHandler{})
-	proto.RegisterPropertyInternalServer(grpcServer, &handler.PropertyHandler{})
+	propertyHandler := new(handler.PropertyHandler)
+	proto.RegisterPropertyExternalServer(grpcServer, propertyHandler)
+	proto.RegisterPropertyInternalServer(grpcServer, propertyHandler)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

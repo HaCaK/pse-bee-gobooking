@@ -37,7 +37,8 @@ func main() {
 		log.Fatalf("Failed to listen on gRPC port %s: %v", port, err)
 	}
 	grpcServer := grpc.NewServer()
-	proto.RegisterBookingExternalServer(grpcServer, &handler.BookingHandler{})
+	bookingHandler := new(handler.BookingHandler)
+	proto.RegisterBookingExternalServer(grpcServer, bookingHandler)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
