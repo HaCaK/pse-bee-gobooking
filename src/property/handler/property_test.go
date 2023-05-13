@@ -13,17 +13,17 @@ import (
 
 type PropertyTestSuite struct {
 	suite.Suite
-	ctx         context.Context
-	client      proto.PropertyExternalClient
-	closeServer func()
-	cleanUpDB   func()
+	ctx                         context.Context
+	client                      proto.PropertyExternalClient
+	closePropertyExternalServer func()
+	cleanUpDB                   func()
 }
 
 // beforeAll
 func (suite *PropertyTestSuite) SetupSuite() {
 	log.Info(">>> From SetupSuite")
 	suite.ctx = context.Background()
-	suite.client, suite.closeServer = server(suite.ctx)
+	suite.client, suite.closePropertyExternalServer = startPropertyExternalServer(suite.ctx)
 }
 
 // beforeEach
@@ -35,7 +35,7 @@ func (suite *PropertyTestSuite) SetupTest() {
 // afterAll
 func (suite *PropertyTestSuite) TearDownSuite() {
 	log.Info(">>> From TearDownSuite")
-	suite.closeServer()
+	suite.closePropertyExternalServer()
 }
 
 // afterEach

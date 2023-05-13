@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/HaCaK/pse-bee-gobooking/src/booking/db"
+	"github.com/HaCaK/pse-bee-gobooking/src/booking/handler/integration_test"
 	"github.com/HaCaK/pse-bee-gobooking/src/booking/proto"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/suite"
@@ -11,19 +12,23 @@ import (
 	"testing"
 )
 
+const propertyInternalServerPort = "9111"
+
 type BookingTestSuite struct {
 	suite.Suite
-	ctx         context.Context
-	client      proto.BookingExternalClient
-	closeServer func()
-	cleanUpDB   func()
+	ctx                        context.Context
+	client                     proto.BookingExternalClient
+	closeBookingExternalServer func()
+	mockPropertyInternalServer *integration_test.MockPropertyInternalServer
+	cleanUpDB                  func()
 }
 
 // beforeAll
 func (suite *BookingTestSuite) SetupSuite() {
 	log.Info(">>> From SetupSuite")
 	suite.ctx = context.Background()
-	suite.client, suite.closeServer = server(suite.ctx)
+	suite.client, suite.closeBookingExternalServer = startBookingExternalServer(suite.ctx)
+	suite.mockPropertyInternalServer = new(integration_test.MockPropertyInternalServer)
 }
 
 // beforeEach
@@ -35,7 +40,7 @@ func (suite *BookingTestSuite) SetupTest() {
 // afterAll
 func (suite *BookingTestSuite) TearDownSuite() {
 	log.Info(">>> From TearDownSuite")
-	suite.closeServer()
+	suite.closeBookingExternalServer()
 }
 
 // afterEach
@@ -241,9 +246,49 @@ func (suite *BookingTestSuite) TestBookingHandler_UpdateBooking() {
 	}
 }
 
-// todo: CreateBooking -> gRPC mock???
+func (suite *BookingTestSuite) TestBookingHandler_CreateBooking() {
+	cancel := suite.mockPropertyInternalServer.Start(propertyInternalServerPort)
+	defer cancel()
 
-// todo: DeleteBooking -> gRPC mock???
+	// given
+	defer deleteBookingInDB()
+	in := &proto.CreateBookingReq{
+		Comment:      "test",
+		CustomerName: "cust",
+		PropertyId:   1,
+	}
+
+	// when
+	out, err := suite.client.CreateBooking(suite.ctx, in)
+
+	// then
+	if err != nil {
+		suite.T().Errorf("Unexpected err: %v", err)
+	} else if out == nil || out.CustomerName != "cust" || out.Status != "CONFIRMED" {
+		suite.T().Errorf("Unexpected: %v", out)
+	}
+}
+
+func (suite *BookingTestSuite) TestBookingHandler_DeleteBooking() {
+	cancel := suite.mockPropertyInternalServer.Start(propertyInternalServerPort)
+	defer cancel()
+
+	// given
+	createBookingInDB()
+	defer deleteBookingInDB()
+
+	in := &proto.BookingIdReq{
+		Id: 1,
+	}
+
+	// when
+	_, err := suite.client.DeleteBooking(suite.ctx, in)
+
+	// then
+	if err != nil {
+		suite.T().Errorf("Unexpected err: %v", err)
+	}
+}
 
 func TestBookingTestSuite(t *testing.T) {
 	suite.Run(t, new(BookingTestSuite))

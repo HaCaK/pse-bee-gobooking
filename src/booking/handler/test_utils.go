@@ -12,15 +12,16 @@ import (
 	"net"
 )
 
-func server(ctx context.Context) (proto.BookingExternalClient, func()) {
+// creates and starts a BookingExternalServer and returns a client that is connected to it and can be used for tests
+func startBookingExternalServer(ctx context.Context) (proto.BookingExternalClient, func()) {
 	buffer := 1024 * 1024
 	lis := bufconn.Listen(buffer)
 
 	baseServer := grpc.NewServer()
-	proto.RegisterBookingExternalServer(baseServer, &BookingHandler{})
+	proto.RegisterBookingExternalServer(baseServer, new(BookingHandler))
 	go func() {
 		if err := baseServer.Serve(lis); err != nil {
-			log.Printf("Error serving server: %v", err)
+			log.Printf("Error serving bookingExternalServer: %v", err)
 		}
 	}()
 
@@ -29,7 +30,7 @@ func server(ctx context.Context) (proto.BookingExternalClient, func()) {
 			return lis.Dial()
 		}), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Printf("Error connecting to server: %v", err)
+		log.Printf("Error connecting to bookingExternalServer: %v", err)
 	}
 
 	closer := func() {

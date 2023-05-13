@@ -12,15 +12,16 @@ import (
 	"net"
 )
 
-func server(ctx context.Context) (proto.PropertyExternalClient, func()) {
+// creates and starts a PropertyExternalServer and returns a client that is connected to it and can be used for tests
+func startPropertyExternalServer(ctx context.Context) (proto.PropertyExternalClient, func()) {
 	buffer := 1024 * 1024
 	lis := bufconn.Listen(buffer)
 
 	baseServer := grpc.NewServer()
-	proto.RegisterPropertyExternalServer(baseServer, &PropertyHandler{})
+	proto.RegisterPropertyExternalServer(baseServer, new(PropertyHandler))
 	go func() {
 		if err := baseServer.Serve(lis); err != nil {
-			log.Printf("Error serving server: %v", err)
+			log.Printf("Error serving propertyExternalServer: %v", err)
 		}
 	}()
 
@@ -29,13 +30,13 @@ func server(ctx context.Context) (proto.PropertyExternalClient, func()) {
 			return lis.Dial()
 		}), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		log.Printf("Error connecting to server: %v", err)
+		log.Printf("Error connecting to propertyExternalServer: %v", err)
 	}
 
 	closer := func() {
 		err := lis.Close()
 		if err != nil {
-			log.Printf("Error closing listener: %v", err)
+			log.Printf("Error closing propertyExternalServer listener: %v", err)
 		}
 		baseServer.Stop()
 	}
