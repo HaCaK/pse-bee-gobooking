@@ -1,0 +1,367 @@
+_type: export
+__export_format: 4
+__export_date: 2023-05-08T19:44:29.734Z
+__export_source: insomnia.desktop.app:v2023.2.0
+resources:
+  - _id: req_a311ebaa420447c29c8aac25d908fc31
+    parentId: fld_fbdefd56016a4481bff3c994ac58f29f
+    modified: 1682535006531
+    created: 1682168566720
+    url: "{{ _.propertyBaseUrl }}/6"
+    name: Delete Property By Id
+    description: ""
+    method: DELETE
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1682093011177.8438
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_fbdefd56016a4481bff3c994ac58f29f
+    parentId: wrk_5f492db7df05432caae40de94cb54977
+    modified: 1682168699261
+    created: 1682168699261
+    name: property
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1682168699261
+    _type: request_group
+  - _id: wrk_5f492db7df05432caae40de94cb54977
+    parentId: null
+    modified: 1682165738120
+    created: 1682165738120
+    name: goBooking
+    description: ""
+    scope: collection
+    _type: workspace
+  - _id: req_6546c28fbef1498793ce035432fdaa2c
+    parentId: fld_fbdefd56016a4481bff3c994ac58f29f
+    modified: 1682541030880
+    created: 1682168584114
+    url: "{{ _.propertyBaseUrl }}/7"
+    name: Update Property By Id
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"ownerName": "Helge"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1682093011165.3438
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_7b3fa20a7e004af08a946357b280ea28
+    parentId: fld_fbdefd56016a4481bff3c994ac58f29f
+    modified: 1682542923257
+    created: 1682168600022
+    url: "{{ _.propertyBaseUrl }}/7"
+    name: Retrieve Property By Id
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1682093011152.8438
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_0a23603077c7499bb4e3b91d8b0c73cb
+    parentId: fld_fbdefd56016a4481bff3c994ac58f29f
+    modified: 1682372218769
+    created: 1682168611064
+    url: "{{ _.propertyBaseUrl }}"
+    name: Retrieve Properties
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1682093011140.3438
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_e112bb39eb33461db9d7fea0fd00f8a8
+    parentId: fld_fbdefd56016a4481bff3c994ac58f29f
+    modified: 1682168768711
+    created: 1682168621751
+    url: "{{ _.propertyBaseUrl }}"
+    name: Create Property
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"description": "test",
+        	"ownerName": "Hans",
+        	"address": "Teststr. 8",
+        	"name": "Villa Paradise"
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1682093011077.8438
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_d89f01b9296945c984f17c13a31f3a6c
+    parentId: fld_f82c692df294441bae4be2d47d7770a0
+    modified: 1682793516069
+    created: 1682167298913
+    url: "{{ _.bookingBaseUrl }}/13"
+    name: Delete Booking By Id
+    description: ""
+    method: DELETE
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1682168651612.8203
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_f82c692df294441bae4be2d47d7770a0
+    parentId: wrk_5f492db7df05432caae40de94cb54977
+    modified: 1682168662264
+    created: 1682168662264
+    name: booking
+    description: ""
+    environment: {}
+    environmentPropertyOrder: null
+    metaSortKey: -1682168662264
+    _type: request_group
+  - _id: req_14d613519fe0461cb957e0464fceb7a3
+    parentId: fld_f82c692df294441bae4be2d47d7770a0
+    modified: 1682793634329
+    created: 1682167190143
+    url: "{{ _.bookingBaseUrl }}/13"
+    name: Update Booking By Id
+    description: ""
+    method: PUT
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1682168651562.8203
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_3ba9a91243434370852d8498332a0f7d
+    parentId: fld_f82c692df294441bae4be2d47d7770a0
+    modified: 1682793440631
+    created: 1682167159647
+    url: "{{ _.bookingBaseUrl }}/13"
+    name: Retrieve Booking By Id
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1682168651512.8203
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_673092a8b6cb4efeb4b65e1f1864ee88
+    parentId: fld_f82c692df294441bae4be2d47d7770a0
+    modified: 1682168689653
+    created: 1682166167046
+    url: "{{ _.bookingBaseUrl }}"
+    name: Retrieve Bookings
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers: []
+    authentication: {}
+    metaSortKey: -1682168651462.8203
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_0fc0f8aa51644e18827e27749c092fea
+    parentId: fld_f82c692df294441bae4be2d47d7770a0
+    modified: 1682623457423
+    created: 1682165741991
+    url: "{{ _.bookingBaseUrl }}"
+    name: Create Booking
+    description: ""
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"comment": "test",
+        	"customerName": "Peter",
+        	"propertyId": 10
+        }
+    parameters: []
+    headers:
+      - name: Content-Type
+        value: application/json
+    authentication: {}
+    metaSortKey: -1682168651412.8203
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: env_64118c3040bd2058a4a6feeb56493cf17df4576e
+    parentId: wrk_5f492db7df05432caae40de94cb54977
+    modified: 1682166242716
+    created: 1682165738123
+    name: Base Environment
+    data: {}
+    dataPropertyOrder: {}
+    color: null
+    isPrivate: false
+    metaSortKey: 1682165738123
+    _type: environment
+  - _id: jar_64118c3040bd2058a4a6feeb56493cf17df4576e
+    parentId: wrk_5f492db7df05432caae40de94cb54977
+    modified: 1682165738125
+    created: 1682165738125
+    name: Default Jar
+    cookies: []
+    _type: cookie_jar
+  - _id: spc_af042a9251154011b6f92939f49271f4
+    parentId: wrk_5f492db7df05432caae40de94cb54977
+    modified: 1682165738121
+    created: 1682165738121
+    fileName: goBooking
+    contents: ""
+    contentType: yaml
+    _type: api_spec
+  - _id: pf_a7a7b1fe7a344360b634920f45763e11
+    parentId: wrk_5f492db7df05432caae40de94cb54977
+    modified: 1682253301956
+    created: 1682253301956
+    name: hello_world.proto
+    protoText: >-
+      // define syntax used in proto file
+
+      syntax = "proto3";
+
+      // options used by gRPC golang plugin (not related to gRPC gateway)
+
+      option go_package = "github.com/anshulrgoyal/grpc-gateway-demo;grpc_gateway_demo";
+
+
+      // well know type by google, gRPC gateway uses HTTP annotation.
+
+      import "google/api/annotations.proto";
+
+
+      package hello_world;
+
+
+      // simple message
+
+      message HelloRequest {
+        string name = 1;
+      }
+
+
+      message HelloReply {
+        string message = 1;
+      }
+
+
+      // a gRPC service
+
+      service Greeter {
+        // SayHello is a rpc call and an option is defined for it
+        rpc SayHello (HelloRequest) returns (HelloReply) {
+          // option type is http
+          option (google.api.http) = {
+            // this is url, for RESTful/JSON api and method
+            // this line means when a HTTP post request comes with "/v1/sayHello" call this rpc method over this service
+            get: "/v1/sayHello/{name}"
+          };
+        }
+      }
+    _type: proto_file
+  - _id: env_628ad25adb2f44fba8532d1b0f022aeb
+    parentId: env_64118c3040bd2058a4a6feeb56493cf17df4576e
+    modified: 1682371386239
+    created: 1682166268721
+    name: goBooking
+    data:
+      bookingBaseUrl: localhost:8080/bookings
+      propertyBaseUrl: localhost:8080/properties
+    dataPropertyOrder:
+      "&":
+        - bookingBaseUrl
+        - propertyBaseUrl
+    color: null
+    isPrivate: false
+    metaSortKey: 1682166268721
+    _type: environment
