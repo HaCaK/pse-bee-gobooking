@@ -29,12 +29,22 @@ Remember to start it with `docker compose up --build` to make sure your latest c
 
 The application contains some basic tests for the Booking and Property microservices.
 
+Start the Booking tests with:
+```
+go test booking
+```
+
 **NOTE:** To run the Booking tests, you have to specify the following env variable:
 ```
 PROPERTY_CONNECT=:9111
 ```
 This is required because the tests for `createBooking` and `deleteBooking` start up
 a `MockPropertyInternalServer` and connect to it on port `9111`.
+
+Start the Property tests with:
+```
+go test property
+```
 
 Each test starts up a test database and destroys it on completion. 
 The database is not reused between tests because its state should not 

@@ -34,10 +34,6 @@ func startBookingExternalServer(ctx context.Context) (proto.BookingExternalClien
 	}
 
 	closer := func() {
-		err := lis.Close()
-		if err != nil {
-			log.Printf("Error closing listener: %v", err)
-		}
 		baseServer.Stop()
 	}
 

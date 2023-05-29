@@ -31,10 +31,6 @@ func (h *MockPropertyInternalServer) Start(port string) func() {
 	}()
 
 	closer := func() {
-		err := lis.Close()
-		if err != nil {
-			log.Printf("Error closing listener: %v", err)
-		}
 		baseServer.Stop()
 	}
 

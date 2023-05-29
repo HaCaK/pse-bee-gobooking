@@ -34,10 +34,6 @@ func startPropertyExternalServer(ctx context.Context) (proto.PropertyExternalCli
 	}
 
 	closer := func() {
-		err := lis.Close()
-		if err != nil {
-			log.Printf("Error closing propertyExternalServer listener: %v", err)
-		}
 		baseServer.Stop()
 	}
 
