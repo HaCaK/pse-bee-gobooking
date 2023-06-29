@@ -97,3 +97,10 @@
 ### Properties
 
 1. Delete Property By Id 2 => not possible, because already booked
+
+
+## Code
+
+- General code structure (3 Microservices, Booking and Property with known structure, Proxy with gRPC Gateway in gen.go and MUX with Gin in main.go)
+- Multi-stage Dockerfile
+- Booking tests with mock PropertyInternalServer
