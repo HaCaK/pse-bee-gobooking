@@ -12,6 +12,7 @@ func mapToProtoPropertyResp(property *model.Property) *proto.PropertyResp {
 		Name:        property.Name,
 		Description: property.Description,
 		OwnerName:   property.OwnerName,
+		Address:     property.Address,
 		Status:      string(property.Status),
 		CreatedAt:   timestamppb.New(property.CreatedAt),
 		UpdatedAt:   timestamppb.New(property.UpdatedAt),

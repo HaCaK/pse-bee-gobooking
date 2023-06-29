@@ -86,6 +86,9 @@ func UpdateBooking(id uint, booking *model.Booking) (*model.Booking, error) {
 // and cancels it at the property service
 func DeleteBooking(id uint) (*model.Booking, error) {
 	booking, err := deleteWithoutCancellation(id)
+	if booking == nil || err != nil {
+		return booking, err
+	}
 
 	err = cancelBooking(booking)
 	if err != nil {

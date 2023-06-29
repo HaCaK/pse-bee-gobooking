@@ -66,8 +66,9 @@ message PropertyResp {
   string name = 2;
   string description = 3;
   string owner_name = 4;
-  string status = 5;
-  uint32 booking_id = 6;
-  google.protobuf.Timestamp created_at = 7;
-  google.protobuf.Timestamp updated_at = 8;
+  string address = 5;
+  string status = 6;
+  uint32 booking_id = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
 }
