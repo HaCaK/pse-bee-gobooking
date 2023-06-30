@@ -29,6 +29,9 @@ func (h *BookingHandler) CreateBooking(_ context.Context, req *proto.CreateBooki
 		if strings.Contains(err.Error(), "code = NotFound") {
 			return nil, status.Errorf(codes.NotFound, err.Error())
 		}
+		if strings.Contains(err.Error(), "code = InvalidArgument") {
+			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		}
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 	return mapToProtoBookingResp(&booking), nil
