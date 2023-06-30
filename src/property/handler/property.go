@@ -85,8 +85,9 @@ func (h *PropertyHandler) DeleteProperty(_ context.Context, req *proto.PropertyI
 	if err != nil {
 		log.Errorf("Error calling service DeleteProperty with ID %v: %v", req.Id, err)
 
-		if errors.Is(err, new(model.PropertyError)) {
-			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		var propertyError *model.PropertyError
+		if errors.As(err, &propertyError) {
+			return nil, status.Errorf(codes.InvalidArgument, propertyError.Error())
 		}
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -111,8 +112,9 @@ func (h *PropertyHandler) ConfirmBooking(_ context.Context, req *proto.BookingRe
 	if err != nil {
 		log.Errorf("Error calling service BookProperty with ID %v: %v", req.PropertyId, err)
 
-		if errors.Is(err, new(model.PropertyError)) {
-			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		var propertyError *model.PropertyError
+		if errors.As(err, &propertyError) {
+			return nil, status.Errorf(codes.InvalidArgument, propertyError.Error())
 		}
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
@@ -135,8 +137,9 @@ func (h *PropertyHandler) CancelBooking(_ context.Context, req *proto.BookingReq
 	if err != nil {
 		log.Errorf("Error calling service FreeProperty with ID %v: %v", req.PropertyId, err)
 
-		if errors.Is(err, new(model.PropertyError)) {
-			return nil, status.Errorf(codes.InvalidArgument, err.Error())
+		var propertyError *model.PropertyError
+		if errors.As(err, &propertyError) {
+			return nil, status.Errorf(codes.InvalidArgument, propertyError.Error())
 		}
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}

@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"strings"
 )
 
 type BookingHandler struct {
@@ -25,6 +26,9 @@ func (h *BookingHandler) CreateBooking(_ context.Context, req *proto.CreateBooki
 	err := service.CreateBooking(&booking)
 	if err != nil {
 		log.Errorf("Error calling service CreateBooking: %v", err)
+		if strings.Contains(err.Error(), "code = NotFound") {
+			return nil, status.Errorf(codes.NotFound, err.Error())
+		}
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 	return mapToProtoBookingResp(&booking), nil
